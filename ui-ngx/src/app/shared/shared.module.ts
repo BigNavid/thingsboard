@@ -79,6 +79,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { TimewindowPanelComponent } from '@shared/components/time/timewindow-panel.component';
 import { TimeintervalComponent } from '@shared/components/time/timeinterval.component';
 import { DatetimePeriodComponent } from '@shared/components/time/datetime-period.component';
+import { QeydarDatePickerModule } from '@qeydar/datepicker';
 import { EnumToArrayPipe } from '@shared/pipe/enum-to-array.pipe';
 import { ClipboardModule } from 'ngx-clipboard';
 import { ValueInputComponent } from '@shared/components/value-input.component';
@@ -505,7 +506,8 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
         useFactory: MarkedOptionsFactory,
         deps: [MarkedOptionsService]
       }
-    })
+    }),
+    QeydarDatePickerModule
   ],
   exports: [
     FooterComponent,

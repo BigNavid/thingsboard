@@ -22,6 +22,7 @@
 @import './scss/animations';
 @import './scss/mixins';
 @import './scss/fonts';
+@import '@angular/cdk/overlay-prebuilt.css'; 
 
 body, html {
   height: 100%;
