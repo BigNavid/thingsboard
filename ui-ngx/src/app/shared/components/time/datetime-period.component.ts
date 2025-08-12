@@ -48,6 +48,11 @@ export class DatetimePeriodComponent implements ControlValueAccessor {
   @Input()
   appearance: MatFormFieldAppearance = 'fill';
 
+  isGregorian = true; // Default to Gregorian calendar
+
+  startDate: string;
+  endDate: string;
+
   private modelValue: FixedWindow;
 
   maxStartDate: Date;
@@ -87,6 +92,15 @@ export class DatetimePeriodComponent implements ControlValueAccessor {
       distinctUntilChanged(),
       takeUntilDestroyed()
     ).subscribe(endDate => this.onEndDateChange(endDate));
+  }
+
+  onDateChange(type: string, value: any) {
+    if (type === 'start') {
+      this.startDate = value;
+    } else if (type === 'end') {
+      this.endDate = value;
+    }
+    console.log('Selected Date Range:', this.startDate, this.endDate);
   }
 
   registerOnChange(fn: any): void {

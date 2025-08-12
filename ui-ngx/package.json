@@ -43,6 +43,7 @@
     "ace-diff": "^3.0.3",
     "angular-gridster2": "~18.0.1",
     "angular2-hotkeys": "^16.0.1",
+    "asa-date-picker": "^0.0.21",
     "canvas-gauges": "^2.1.7",
     "core-js": "^3.39.0",
     "dayjs": "1.11.13",

@@ -3512,6 +3512,15 @@ arraybuffer.prototype.slice@^1.0.3:
     is-array-buffer "^3.0.4"
     is-shared-array-buffer "^1.0.2"
 
+asa-date-picker@^0.0.21:
+  version "0.0.21"
+  resolved "https://registry.yarnpkg.com/asa-date-picker/-/asa-date-picker-0.0.21.tgz#8f69ba5d996089434d430ec471f652eed18d0a48"
+  integrity sha512-gJzhCY5QgoO845zaWCiUI7PjQsjeO0ibHw7Bsk/z8j/dJ/GvHpF2YJ7PvwawvgFgef/SLwNCcTdF0duxGcO5yQ==
+  dependencies:
+    date-fns "^4.1.0"
+    date-fns-jalali "^4.1.0-0"
+    tslib "^2.3.0"
+
 async@~2.6.3:
   version "2.6.4"
   resolved "https://registry.yarnpkg.com/async/-/async-2.6.4.tgz#706b7ff6084664cd7eae713f6f965433b5504221"
@@ -4575,6 +4584,16 @@ data-view-byte-offset@^1.0.0:
     call-bind "^1.0.6"
     es-errors "^1.3.0"
     is-data-view "^1.0.1"
+
+date-fns-jalali@^4.1.0-0:
+  version "4.1.0-0"
+  resolved "https://registry.yarnpkg.com/date-fns-jalali/-/date-fns-jalali-4.1.0-0.tgz#9c7fb286004fab267a300d3e9f1ada9f10b4b6b0"
+  integrity sha512-hTIP/z+t+qKwBDcmmsnmjWTduxCg+5KfdqWQvb2X/8C9+knYY6epN/pfxdDuyVlSVeFz0sM5eEfwIUQ70U4ckg==
+
+date-fns@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-4.1.0.tgz#64b3d83fff5aa80438f5b1a633c2e83b8a1c2d14"
+  integrity sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==
 
 dayjs@1.11.13, dayjs@^1.11.10, dayjs@^1.11.5:
   version "1.11.13"
