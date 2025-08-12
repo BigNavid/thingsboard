@@ -1,0 +1,44 @@
+  <!-- سوییچ شمسی/میلادی -->
+  <div class="calendar-toggle">
+    <mat-button-toggle-group [value]="calendarType" (change)="onCalendarTypeChange($event.value)">
+      <mat-button-toggle value="gregorian">میلادی</mat-button-toggle>
+      <mat-button-toggle value="jalali">شمسی</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+<!-- سوییچ نوع تقویم + دو پیکر «از/تا» با تاریخ و زمان یکپارچه -->
+<section class="tb-form-row column-xs no-border no-padding tb-standard-fields"
+         [formGroup]="dateTimePeriodFormGroup">
+
+  <!-- از -->
+  <mat-form-field class="flex" [subscriptSizing]="subscriptSizing" [appearance]="appearance">
+    <mat-label translate>datetime.from</mat-label>
+    <ng-persian-datepicker
+      [calendarIsGregorian]="calendarType === 'gregorian'"
+      [timeEnable]="true"
+      [dateFormat]="'YYYY/MM/DD HH:mm'"
+      [dateGregorianFormat]="'YYYY-MM-DD HH:mm'"
+      [dateMin]="null"
+      [dateMax]="maxStartTs"
+      (dateOnSelect)="onStartSelect($event)">
+      <!-- کمینه تغییر: همان کنترل قبلی را نگه داشتیم -->
+      <input matInput [formControl]="dateTimePeriodFormGroup.get('startDate')" />
+    </ng-persian-datepicker>
+  </mat-form-field>
+
+  <!-- تا -->
+  <div class="flex picker-col">
+    <label class="time-label" translate>datetime.to</label>
+    <ng-persian-datepicker
+      [calendarIsGregorian]="calendarType === 'gregorian'"
+      [timeEnable]="true"
+      [dateFormat]="'YYYY/MM/DD HH:mm'"
+      [dateGregorianFormat]="'YYYY-MM-DD HH:mm'"
+      [dateMin]="minEndTs"
+      [dateMax]="maxEndTs"
+      (dateOnSelect)="onEndSelect($event)">
+      <input type="text" [formControl]="dateTimePeriodFormGroup.get('endDate')" />
+    </ng-persian-datepicker>
+  </div>
+
+</section>

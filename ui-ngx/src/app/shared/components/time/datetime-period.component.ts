@@ -1,187 +1,137 @@
-///
-/// Copyright © 2016-2025 The Thingsboard Authors
-///
-/// Licensed under the Apache License, Version 2.0 (the "License");
-/// you may not use this file except in compliance with the License.
-/// You may obtain a copy of the License at
-///
-///     http://www.apache.org/licenses/LICENSE-2.0
-///
-/// Unless required by applicable law or agreed to in writing, software
-/// distributed under the License is distributed on an "AS IS" BASIS,
-/// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-/// See the License for the specific language governing permissions and
-/// limitations under the License.
-///
-
 import { Component, forwardRef, Input } from '@angular/core';
 import { ControlValueAccessor, FormBuilder, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { DAY, FixedWindow, MINUTE } from '@shared/models/time/time.models';
 import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { Jalali } from 'jalali-ts';
 
-interface DateTimePeriod {
-  startDate: Date;
-  endDate: Date;
+type CalendarType = 'gregorian' | 'jalali';
+
+export interface FixedWindow {
+  startTimeMs: number;
+  endTimeMs: number;
 }
 
 @Component({
   selector: 'tb-datetime-period',
   templateUrl: './datetime-period.component.html',
   styleUrls: ['./datetime-period.component.scss'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => DatetimePeriodComponent),
-      multi: true
-    }
-  ]
+  providers: [{
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: forwardRef(() => DatetimePeriodComponent),
+    multi: true
+  }]
 })
 export class DatetimePeriodComponent implements ControlValueAccessor {
 
-  @Input() disabled: boolean;
+  @Input() disabled = false;
+  @Input() subscriptSizing: 'fixed' | 'dynamic' = 'fixed';
+  @Input() appearance: 'legacy' | 'standard' | 'fill' | 'outline' = 'fill';
 
-  @Input()
-  subscriptSizing: SubscriptSizing = 'fixed';
+  // سوییچ تقویم
+  calendarType: CalendarType = 'jalali';
 
-  @Input()
-  appearance: MatFormFieldAppearance = 'fill';
-
-  private modelValue: FixedWindow;
-
-  maxStartDate: Date;
-  maxEndDate: Date;
-
-  private maxStartDateTs: number;
-  private minEndDateTs: number;
-  private maxStartTs: number;
-  private maxEndTs: number;
-
-  private timeShiftMs = MINUTE;
-
+  // فرم: نمایش رشته‌ای داخل input ها
   dateTimePeriodFormGroup = this.fb.group({
-    startDate: this.fb.control<Date>(null),
-    endDate: this.fb.control<Date>(null)
+    startDate: this.fb.control<string | null>(null),
+    endDate:   this.fb.control<string | null>(null)
   });
 
-  private changePending = false;
+  // مدل واقعی بر حسب timestamp (ms)
+  private startTs = Date.now() - 24 * 60 * 60 * 1000;
+  private endTs   = Date.now();
 
-  private propagateChange = null;
+  // محدودیت‌ها برای پیکرها (ts)
+  maxEndTs   = Date.now();
+  maxStartTs = this.endTs - 60_000;
+  minEndTs: number | null = this.startTs + 60_000;
 
-  constructor(private fb: FormBuilder) {
-    this.dateTimePeriodFormGroup.valueChanges.pipe(
-      distinctUntilChanged((prevDateTimePeriod, dateTimePeriod) =>
-        prevDateTimePeriod.startDate === dateTimePeriod.startDate && prevDateTimePeriod.endDate === dateTimePeriod.endDate),
-      takeUntilDestroyed()
-    ).subscribe((dateTimePeriod: DateTimePeriod) => {
-      this.updateMinMaxDates(dateTimePeriod);
-      this.updateView();
-    });
+  private propagateChange: (v: FixedWindow | null) => void;
 
-    this.dateTimePeriodFormGroup.get('startDate').valueChanges.pipe(
-      distinctUntilChanged(),
-      takeUntilDestroyed()
-    ).subscribe(startDate => this.onStartDateChange(startDate));
-    this.dateTimePeriodFormGroup.get('endDate').valueChanges.pipe(
-      distinctUntilChanged(),
-      takeUntilDestroyed()
-    ).subscribe(endDate => this.onEndDateChange(endDate));
-  }
+  constructor(private fb: FormBuilder) {}
 
-  registerOnChange(fn: any): void {
-    this.propagateChange = fn;
-    if (this.changePending && this.propagateChange) {
-      this.changePending = false;
-      this.propagateChange(this.modelValue);
-    }
-  }
-
-  registerOnTouched(fn: any): void {
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-    if (this.disabled) {
-      this.dateTimePeriodFormGroup.disable({emitEvent: false});
+  /* ====== ControlValueAccessor ====== */
+  writeValue(v: FixedWindow | null): void {
+    if (v) {
+      this.startTs = v.startTimeMs;
+      this.endTs   = v.endTimeMs;
     } else {
-      this.dateTimePeriodFormGroup.enable({emitEvent: false});
+      this.startTs = Date.now() - 24 * 60 * 60 * 1000;
+      this.endTs   = Date.now();
     }
+    this.recomputeBounds();
+    this.prefillDisplayControlsFromTs(); // نمایش اولیه مثل TB
   }
 
-  writeValue(datePeriod: FixedWindow): void {
-    this.modelValue = datePeriod;
-    if (this.modelValue) {
-      this.dateTimePeriodFormGroup.patchValue({
-        startDate: new Date(this.modelValue.startTimeMs),
-        endDate: new Date(this.modelValue.endTimeMs)
-      }, {emitEvent: false});
+  registerOnChange(fn: any): void { this.propagateChange = fn; }
+  registerOnTouched(_: any): void {}
+  setDisabledState(disabled: boolean): void {
+    this.disabled = disabled;
+    disabled ? this.dateTimePeriodFormGroup.disable({ emitEvent: false })
+             : this.dateTimePeriodFormGroup.enable({ emitEvent: false });
+  }
+  /* ================================== */
+
+  onCalendarTypeChange(t: CalendarType) {
+    this.calendarType = t;
+    // برای اعمال قطعی سوییچ، در HTML با *ngIf پیکر را recreate کردیم
+    // و اینجا فقط مقدار نمایشی input ها را ریفرمت می‌کنیم.
+    this.prefillDisplayControlsFromTs();
+  }
+
+  // رویداد انتخاب «از» — $event: IActiveDate (timestamp/gregorian/jalali)
+  onStartSelect(e: any) {
+    const ts = e?.timestamp as number | undefined;
+    if (!ts) return;
+    this.startTs = Math.min(ts, this.endTs - 60_000); // حداقل فاصله 1 دقیقه
+    this.recomputeBounds();
+    this.emitFixedWindow();
+    // ورودی نمایشی را به عهدهٔ خود پیکر می‌گذاریم (لازم نیست اینجا set کنیم)
+  }
+
+  // رویداد انتخاب «تا»
+  onEndSelect(e: any) {
+    let ts = e?.timestamp as number | undefined;
+    if (!ts) return;
+    const now = Date.now();
+    if (ts > now) ts = now;                  // «تا» جلوتر از اکنون نباشد
+    this.endTs = Math.max(ts, this.startTs + 60_000);
+    this.recomputeBounds();
+    this.emitFixedWindow();
+  }
+
+  private recomputeBounds() {
+    const now = Date.now();
+    this.maxEndTs   = now;
+    this.maxStartTs = this.endTs - 60_000;
+    this.minEndTs   = this.startTs + 60_000;
+  }
+
+  private emitFixedWindow() {
+    this.propagateChange?.({ startTimeMs: this.startTs, endTimeMs: this.endTs });
+  }
+
+  // نمایش اولیه/بازفرمتِ مقدار داخل inputها مطابق سوییچ
+  private prefillDisplayControlsFromTs() {
+    const startText = this.formatDisplay(this.startTs, this.calendarType);
+    const endText   = this.formatDisplay(this.endTs,   this.calendarType);
+    this.dateTimePeriodFormGroup.patchValue({
+      startDate: startText, endDate: endText
+    }, { emitEvent: false });
+  }
+
+  private formatDisplay(ts: number, cal: CalendarType): string {
+    const d = new Date(ts);
+    if (cal === 'gregorian') {
+      const yyyy = d.getFullYear();
+      const MM = this.zz(d.getMonth() + 1);
+      const DD = this.zz(d.getDate());
+      const HH = this.zz(d.getHours());
+      const mm = this.zz(d.getMinutes());
+      return `${yyyy}-${MM}-${DD} ${HH}:${mm}`;
     } else {
-      const date = new Date();
-      this.dateTimePeriodFormGroup.patchValue({
-        startDate: new Date(date.getTime() - DAY),
-        endDate: date
-      }, {emitEvent: false});
-      this.updateView();
-    }
-    this.updateMinMaxDates(this.dateTimePeriodFormGroup.value);
-  }
-
-  private updateView() {
-    let value: FixedWindow = null;
-    const dateTimePeriod = this.dateTimePeriodFormGroup.value;
-    if (dateTimePeriod.startDate && dateTimePeriod.endDate) {
-      value = {
-        startTimeMs: dateTimePeriod.startDate.getTime(),
-        endTimeMs: dateTimePeriod.endDate.getTime()
-      };
-    }
-    this.modelValue = value;
-    if (!this.propagateChange) {
-      this.changePending = true;
-    } else {
-      this.propagateChange(this.modelValue);
+      const jalaliDate = new Jalali(d);
+      return jalaliDate.format('YYYY/MM/DD HH:mm');
     }
   }
 
-  private updateMinMaxDates(dateTimePeriod: Partial<DateTimePeriod>) {
-    this.maxEndDate = new Date();
-    this.maxEndTs = this.maxEndDate.getTime();
-    this.maxStartTs = this.maxEndTs - this.timeShiftMs;
-    this.maxStartDate = new Date(this.maxStartTs);
-
-    if (dateTimePeriod.endDate) {
-      this.maxStartDateTs = dateTimePeriod.endDate.getTime() - this.timeShiftMs;
-    }
-    if (dateTimePeriod.startDate) {
-      this.minEndDateTs = dateTimePeriod.startDate.getTime() + this.timeShiftMs;
-    }
-  }
-
-  private onStartDateChange(startDate: Date) {
-    if (startDate) {
-      let startDateTs = startDate.getTime();
-      if (startDateTs > this.maxStartTs) {
-        startDateTs = this.maxStartTs;
-        this.dateTimePeriodFormGroup.get('startDate').patchValue(new Date(startDateTs), { emitEvent: false });
-      }
-      if (startDateTs > this.maxStartDateTs) {
-        this.dateTimePeriodFormGroup.get('endDate').patchValue(new Date(startDateTs + this.timeShiftMs), { emitEvent: false });
-      }
-    }
-  }
-
-  private onEndDateChange(endDate: Date) {
-    if (endDate) {
-      let endDateTs = endDate.getTime();
-      if (endDateTs > this.maxEndTs) {
-        endDateTs = this.maxEndTs;
-        this.dateTimePeriodFormGroup.get('endDate').patchValue(new Date(endDateTs), { emitEvent: false });
-      }
-      if (endDateTs < this.minEndDateTs) {
-        this.dateTimePeriodFormGroup.get('startDate').patchValue(new Date(endDateTs - this.timeShiftMs), { emitEvent: false });
-      }
-    }
-  }
-
+  private zz(n: number) { return n < 10 ? `0${n}` : `${n}`; }
 }

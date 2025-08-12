@@ -6452,6 +6452,11 @@ jalaali-js@^1.2.7:
   resolved "https://registry.yarnpkg.com/jalaali-js/-/jalaali-js-1.2.8.tgz#dfc80398a0c4b4182f3eb883363b3b621e7a3878"
   integrity sha512-Jl/EwY84JwjW2wsWqeU4pNd22VNQ7EkjI36bDuLw31wH98WQW4fPjD0+mG7cdCK+Y8D6s9R3zLiQ3LaKu6bD8A==
 
+jalali-ts@^8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/jalali-ts/-/jalali-ts-8.0.0.tgz#8be02b65a06b7e2dc53baa093232335004ffd7fb"
+  integrity sha512-XZmEjaw56w47ZjJUnC/18juoJta4BcpKRE3cFZpw07+gy+nt3b9e+KGqlcRFph8Xn4LRtyx6l5QpEZftbtDZ3Q==
+
 jest-worker@^27.4.5:
   version "27.5.1"
   resolved "https://registry.yarnpkg.com/jest-worker/-/jest-worker-27.5.1.tgz#8d146f0900e8973b106b6f73cc1e9a8cb86f8db0"
@@ -7401,6 +7406,13 @@ neo-async@^2.6.2:
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
+
+ng-persian-datepicker@^10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/ng-persian-datepicker/-/ng-persian-datepicker-10.0.0.tgz#df50d58c7e15a1e876f124b0e291a3ceb5b2723f"
+  integrity sha512-sXpUV18j+W+oUfCw1OKeRhf0nbwkTAPS+s8YbtBApeDzNgYWD2QZKapkGxD3rKuXVoc3bMJVhx73xVWQet0Z5A==
+  dependencies:
+    tslib "^2.3.0"
 
 ngrx-store-freeze@^0.2.4:
   version "0.2.4"

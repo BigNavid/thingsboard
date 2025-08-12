@@ -1,31 +1,73 @@
-<!--
+<!-- سوییچ وسط -->
+<div class="calendar-toggle">
+  <mat-button-toggle-group [value]="calendarType" (change)="onCalendarTypeChange($event.value)">
+    <mat-button-toggle class="mat-slide" value="gregorian">میلادی</mat-button-toggle>
+    <mat-button-toggle class="mat-slide" value="jalali">شمسی</mat-button-toggle>
+  </mat-button-toggle-group>
+</div>
+<section class="tb-form-row column-xs no-border no-padding tb-standard-fields"
+         [formGroup]="dateTimePeriodFormGroup" style="font-family: Vazirmatn;">
 
-    Copyright © 2016-2025 The Thingsboard Authors
+  <!-- از -->
+  <mat-form-field class="flex" [subscriptSizing]="subscriptSizing" [appearance]="appearance">
+    <mat-label translate>datetime.from</mat-label>
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+    <!-- وقتی شمسی است -->
+    <ng-container *ngIf="calendarType==='jalali'; else gregStart">
+      <ng-persian-datepicker
+        [calendarIsGregorian]="false"
+        [timeEnable]="true"
+        [dateFormat]="'YYYY/MM/DD HH:mm'"
+        [dateMin]="null"
+        [dateMax]="maxStartTs"
+        (dateOnSelect)="onStartSelect($event)">
+        <!-- الگوی مینیمال: فقط input با کنترل فرم -->
+        <input matInput type="text" formControlName="startDate"/>
+      </ng-persian-datepicker>
+    </ng-container>
 
-        http://www.apache.org/licenses/LICENSE-2.0
+    <!-- وقتی میلادی است -->
+    <ng-template #gregStart>
+      <ng-persian-datepicker
+        [calendarIsGregorian]="true"
+        [timeEnable]="true"
+        [dateGregorianFormat]="'YYYY-MM-DD HH:mm'"
+        [dateMin]="null"
+        [dateMax]="maxStartTs"
+        (dateOnSelect)="onStartSelect($event)">
+        <input matInput type="text" formControlName="startDate"/>
+      </ng-persian-datepicker>
+    </ng-template>
+  </mat-form-field>
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+  <!-- تا -->
+  <mat-form-field class="flex" [subscriptSizing]="subscriptSizing" [appearance]="appearance">
+    <mat-label translate>datetime.to</mat-label>
 
--->
-<section class="tb-form-row column-xs no-border no-padding tb-standard-fields" [formGroup]="dateTimePeriodFormGroup">
-    <mat-form-field class="flex" [subscriptSizing]="subscriptSizing" [appearance]="appearance">
-      <mat-label translate>datetime.from</mat-label>
-      <mat-datetimepicker-toggle [for]="startDatePicker" matSuffix></mat-datetimepicker-toggle>
-      <mat-datetimepicker #startDatePicker type="datetime" openOnFocus="true"></mat-datetimepicker>
-      <input matInput formControlName="startDate" [matDatetimepicker]="startDatePicker" [max]="maxStartDate">
-    </mat-form-field>
-    <mat-form-field class="flex" [subscriptSizing]="subscriptSizing" [appearance]="appearance">
-      <mat-label translate>datetime.to</mat-label>
-      <mat-datetimepicker-toggle [for]="endDatePicker" matSuffix></mat-datetimepicker-toggle>
-      <mat-datetimepicker #endDatePicker type="datetime" openOnFocus="true"></mat-datetimepicker>
-      <input matInput formControlName="endDate" [matDatetimepicker]="endDatePicker" [max]="maxEndDate">
-    </mat-form-field>
+    <ng-container *ngIf="calendarType==='jalali'; else gregEnd">
+      <ng-persian-datepicker
+        [calendarIsGregorian]="false"
+        [timeEnable]="true"
+        [dateFormat]="'YYYY/MM/DD HH:mm'"
+        [dateMin]="minEndTs"
+        [dateMax]="maxEndTs"
+        (dateOnSelect)="onEndSelect($event)">
+        <input matInput type="text" formControlName="endDate"/>
+      </ng-persian-datepicker>
+    </ng-container>
+
+    <ng-template #gregEnd>
+      <ng-persian-datepicker
+        [calendarIsGregorian]="true"
+        [timeEnable]="true"
+        [dateGregorianFormat]="'YYYY-MM-DD HH:mm'"
+        [dateMin]="minEndTs"
+        [dateMax]="maxEndTs"
+        (dateOnSelect)="onEndSelect($event)">
+        <input matInput type="text" formControlName="endDate"/>
+      </ng-persian-datepicker>
+    </ng-template>
+  </mat-form-field>
+
 </section>
+
