@@ -51,6 +51,7 @@
     "flot.curvedlines": "https://github.com/MichaelZinsmaier/CurvedLines.git#master",
     "font-awesome": "^4.7.0",
     "html2canvas": "^1.4.1",
+    "jalaali-js": "^1.2.8",
     "jquery": "^3.7.1",
     "jquery.terminal": "^2.44.1",
     "js-beautify": "1.15.1",

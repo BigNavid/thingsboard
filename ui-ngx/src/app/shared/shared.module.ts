@@ -55,7 +55,12 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipModule } from '@angular/material/tooltip';
 import { MatListModule } from '@angular/material/list';
-import { DatetimeAdapter, MatDatetimepickerModule, MatNativeDatetimeModule } from '@mat-datetimepicker/core';
+import {
+  DatetimeAdapter,
+  MAT_DATETIME_FORMATS,
+  MatDatetimepickerModule,
+  MatNativeDatetimeModule
+} from '@mat-datetimepicker/core';
 import { NgxDaterangepickerMd } from 'ngx-daterangepicker-material';
 import { GridsterModule } from 'angular-gridster2';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -150,7 +155,7 @@ import { WidgetsBundleSearchComponent } from '@shared/components/widgets-bundle-
 import { SelectableColumnsPipe } from '@shared/pipe/selectable-columns.pipe';
 import { QuickTimeIntervalComponent } from '@shared/components/time/quick-time-interval.component';
 import { OtaPackageAutocompleteComponent } from '@shared/components/ota-package/ota-package-autocomplete.component';
-import { MAT_DATE_LOCALE } from '@angular/material/core';
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
 import { CopyButtonComponent } from '@shared/components/button/copy-button.component';
 import { TogglePasswordComponent } from '@shared/components/button/toggle-password.component';
 import { WidgetButtonToggleComponent } from '@shared/components/button/widget-button-toggle.component';
@@ -228,6 +233,18 @@ import { JsFuncModuleRowComponent } from '@shared/components/js-func-module-row.
 import { EntityKeyAutocompleteComponent } from '@shared/components/entity/entity-key-autocomplete.component';
 import { DurationLeftPipe } from '@shared/pipe/duration-left.pipe';
 import { MqttVersionSelectComponent } from '@shared/components/mqtt-version-select.component';
+import {JALALI_DATE_FORMATS, JalaliDateAdapter} from "@shared/adapter/jalali-date-adapter";
+
+export const JALALI_DATETIME_FORMATS = {
+  parse:   { dateInput: 'jYYYY/jMM/jDD HH:mm' },
+  display: {
+    dateInput:        'jYYYY/jMM/jDD HH:mm',
+    monthYearLabel:   'jYYYY jMMMM',
+    timeLabel:        'HH:mm',
+    dateA11yLabel:    'jYYYY/jMM/jDD',
+    monthYearA11yLabel:'jYYYY jMMMM'
+  }
+};
 
 export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService) {
   return markedOptionsService;
@@ -287,7 +304,11 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
         disableTooltipInteractivity: true
       }
     },
-    CountryData
+    CountryData,
+    { provide: DateAdapter, useClass: JalaliDateAdapter },      // نمایش/parse جلالی
+    { provide: MAT_DATE_FORMATS, useValue: JALALI_DATE_FORMATS }, // برای خود MatInput/Datepicker
+    { provide: MAT_DATETIME_FORMATS, useValue: JALALI_DATETIME_FORMATS }, // مخصوص mat-datetimepicker
+    { provide: MAT_DATE_LOCALE, useValue: 'fa-IR' }
   ],
   declarations: [
     FooterComponent,
