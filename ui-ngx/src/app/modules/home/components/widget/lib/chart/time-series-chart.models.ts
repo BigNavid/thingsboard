@@ -22,7 +22,7 @@ import {
 import {
   autoDateFormat,
   AutoDateFormatSettings,
-  ComponentStyle,
+  ComponentStyle, DateFormatProcessor, DateFormatSettings,
   Font,
   tsToFormatTimeUnit,
   ValueSourceConfig,
@@ -99,6 +99,8 @@ import {
   TimeSeriesChartTooltipWidgetSettings
 } from '@home/components/widget/lib/chart/time-series-chart-tooltip.models';
 import { TbUnit, TbUnitConverter } from '@shared/models/unit.models';
+import moment from 'moment-jalaali';
+import {Injector} from "@angular/core";
 
 type TimeSeriesChartDataEntry = [number, any, number, number];
 
@@ -452,7 +454,7 @@ export const defaultTimeSeriesChartXAxisSettings: TimeSeriesChartXAxisSettings =
   show: true,
   label: '',
   labelFont: {
-    family: 'Roboto',
+    family: 'Vazirmatn',
     size: 12,
     sizeUnit: 'px',
     style: 'normal',
@@ -463,7 +465,7 @@ export const defaultTimeSeriesChartXAxisSettings: TimeSeriesChartXAxisSettings =
   position: AxisPosition.bottom,
   showTickLabels: true,
   tickLabelFont: {
-    family: 'Roboto',
+    family: 'Vazirmatn',
     size: 10,
     sizeUnit: 'px',
     style: 'normal',
@@ -951,7 +953,7 @@ export const createTimeSeriesYAxis = (units: string,
         color: yAxisNameStyle.color,
         fontStyle: yAxisNameStyle.fontStyle,
         fontWeight: yAxisNameStyle.fontWeight,
-        fontFamily: yAxisNameStyle.fontFamily,
+        fontFamily: `Vazirmatn, ${yAxisNameStyle.fontFamily}`,
         fontSize: yAxisNameStyle.fontSize
       },
       axisLine: {
@@ -972,7 +974,7 @@ export const createTimeSeriesYAxis = (units: string,
         color: yAxisTickLabelStyle.color,
         fontStyle: yAxisTickLabelStyle.fontStyle,
         fontWeight: yAxisTickLabelStyle.fontWeight,
-        fontFamily: yAxisTickLabelStyle.fontFamily,
+        fontFamily: `Vazirmatn, ${yAxisTickLabelStyle.fontFamily}`,
         fontSize: yAxisTickLabelStyle.fontSize,
         formatter: (value: any) => {
           let result: string;
@@ -1024,7 +1026,7 @@ export const createTimeSeriesXAxis = (id: string,
         color: xAxisNameStyle.color,
         fontStyle: xAxisNameStyle.fontStyle,
         fontWeight: xAxisNameStyle.fontWeight,
-        fontFamily: xAxisNameStyle.fontFamily,
+        fontFamily: `Vazirmatn, ${xAxisNameStyle.fontFamily}`,
         fontSize: xAxisNameStyle.fontSize
       },
       axisPointer: {
@@ -1043,7 +1045,7 @@ export const createTimeSeriesXAxis = (id: string,
         color: xAxisTickLabelStyle.color,
         fontStyle: xAxisTickLabelStyle.fontStyle,
         fontWeight: xAxisTickLabelStyle.fontWeight,
-        fontFamily: xAxisTickLabelStyle.fontFamily,
+        fontFamily: `Vazirmatn, ${xAxisTickLabelStyle.fontFamily}`,
         fontSize: xAxisTickLabelStyle.fontSize,
         hideOverlap: true,
         /** Min/Max time label always visible **/
@@ -1053,8 +1055,25 @@ export const createTimeSeriesXAxis = (id: string,
         showMaxLabel: true, */
         formatter: (value: number, _index: number, extra: {level: number}) => {
           const unit = tsToFormatTimeUnit(value);
-          const format = ticksFormat[unit];
-          const formatted = datePipe.transform(value, format);
+
+          // معادل شمسی فرمت‌ها (باید دستی تعریف کنیم چون ticksFormat میلادیه)
+          const jalaliTicksFormat: { [unit: string]: string } = {
+            millisecond: 'HH:mm:ss.SSS', // نمایش میلی‌ثانیه
+            second: 'HH:mm:ss',          // ثانیه دقیق
+            minute: 'HH:mm',             // فقط ساعت/دقیقه
+            hour: 'HH:mm',               // فقط ساعت/دقیقه
+            day: 'jMMMM jDD',              // ماه شمسی سه حرفی + روز
+            month: 'jMMMM jYYYY',          // ماه سه حرفی + سال شمسی
+            year: 'jYYYY'                 // فقط سال
+          };
+
+          // فرمت جلالی رو پیدا میکنیم
+          const format = jalaliTicksFormat[unit] || 'jYYYY/jMM/jDD HH:mm';
+
+          // تبدیل تایم‌استمپ به شمسی
+          moment.loadPersian({dialect: "persian-modern"});
+          const formatted = moment(value).format(format);
+
           if (extra.level > 0) {
             return `{primary|${formatted}}`;
           } else {
@@ -1176,7 +1195,7 @@ const generateChartThresholds = (thresholdItems: TimeSeriesChartThresholdItem[])
               color: thresholdLabelStyle.color,
               fontStyle: thresholdLabelStyle.fontStyle,
               fontWeight: thresholdLabelStyle.fontWeight,
-              fontFamily: thresholdLabelStyle.fontFamily,
+              fontFamily: `Vazirmatn, ${thresholdLabelStyle.fontFamily}`,
               fontSize: thresholdLabelStyle.fontSize,
               formatter: params => formatValue(params.value, item.decimals,
                 item.units, false)

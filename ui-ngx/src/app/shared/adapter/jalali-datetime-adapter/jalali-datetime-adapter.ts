@@ -37,27 +37,7 @@ export class JalaliDatetimeAdapter extends DatetimeAdapter<Date> {
    * دریافت ماه شمسی از تاریخ (0-11)
    */
   override getMonth(date: Date): number {
-    console.log("=== تست moment-jalaali ===");
-    console.log("تاریخ ورودی:", date);
-
-    const m = moment(date);
-    console.log("moment object:", m);
-
-    // تست متدهای جلالی
-    console.log("jYear:", m.jYear());
-    console.log("jMonth:", m.jMonth());
-    console.log("jDate:", m.jDate());
-
-    // مقایسه با تاریخ میلادی
-    console.log("year (میلادی):", m.year());
-    console.log("month (میلادی):", m.month());
-    console.log("date (میلادی):", m.date());
-
-    // تست فرمت جلالی
-    console.log("فرمت جلالی:", m.format('jYYYY/jMM/jDD'));
-    console.log("فرمت میلادی:", m.format('YYYY/MM/DD'));
-
-    return m.jMonth();
+    return moment(date).jMonth();
   }
 
   /**
@@ -92,23 +72,18 @@ export class JalaliDatetimeAdapter extends DatetimeAdapter<Date> {
    * دریافت نام ماه‌های شمسی
    */
   override getMonthNames(style: 'long' | 'short' | 'narrow'): string[] {
-    // const months = moment.localeData('fa').jMonths();
-    // if (style === 'short' || style === 'narrow') {
-    // نام‌های کوتاه ماه‌ها
-
-
     moment.loadPersian({dialect: "persian-modern"});
 
     // Get all Jalali month names
     const jalaliMonth = [];
-    for (let i = 0; i < 12; i++) {
+    for (let i = 1; i < 13; i++) {
       // Create a moment object for the first day of each month
-      const monthn = moment().jMonth(i).startOf('month');
+      const month = moment().jMonth(i).startOf('month');
       // Get the month name in Persian
       if (style === 'short' || style === 'narrow') {
-        jalaliMonth.push(monthn.format('jMMM'));
+        jalaliMonth.push(month.format('jMMM'));
       } else {
-        jalaliMonth.push(monthn.format('jMMMM'));
+        jalaliMonth.push(month.format('jMMMM'));
       }
     }
     return jalaliMonth;
