@@ -100,7 +100,6 @@ import {
 } from '@home/components/widget/lib/chart/time-series-chart-tooltip.models';
 import { TbUnit, TbUnitConverter } from '@shared/models/unit.models';
 import moment from 'moment-jalaali';
-import {Injector} from "@angular/core";
 
 type TimeSeriesChartDataEntry = [number, any, number, number];
 
@@ -1011,6 +1010,7 @@ export const createTimeSeriesXAxis = (id: string,
   const xAxisNameStyle = createChartTextStyle(settings.labelFont,
     settings.labelColor, darkMode, 'axis.label');
   const ticksFormat = mergeDeep({}, defaultXAxisTicksFormat, settings.ticksFormat);
+  moment.loadPersian({dialect: 'persian-modern'});
   return {
     id,
     settings,
@@ -1054,7 +1054,11 @@ export const createTimeSeriesXAxis = (id: string,
         showMinLabel: true,
         showMaxLabel: true, */
         formatter: (value: number, _index: number, extra: {level: number}) => {
-          const unit = tsToFormatTimeUnit(value);
+          let unit = tsToFormatTimeUnit(value);
+
+
+          const isFirstDayOfMonthJalali = moment(value).jDate() === 1;
+          const isFirstDayOfMonthGeorgian = (new Date(value)).getDate() === 1;
 
           // معادل شمسی فرمت‌ها (باید دستی تعریف کنیم چون ticksFormat میلادیه)
           const jalaliTicksFormat: { [unit: string]: string } = {
@@ -1062,19 +1066,25 @@ export const createTimeSeriesXAxis = (id: string,
             second: 'HH:mm:ss',          // ثانیه دقیق
             minute: 'HH:mm',             // فقط ساعت/دقیقه
             hour: 'HH:mm',               // فقط ساعت/دقیقه
-            day: 'jMMMM jDD',              // ماه شمسی سه حرفی + روز
-            month: 'jMMMM jYYYY',          // ماه سه حرفی + سال شمسی
+            day: 'jMMMM jDD',              // ماه شمسی چهار حرفی + روز
+            month: 'jMMMM jYYYY',          // ماه چهار حرفی + سال شمسی
             year: 'jYYYY'                 // فقط سال
           };
+
+          if(extra.level > 0 && isFirstDayOfMonthGeorgian && !isFirstDayOfMonthJalali){
+            unit = 'day';
+          } else if(isFirstDayOfMonthJalali){
+            unit = 'month';
+          }
 
           // فرمت جلالی رو پیدا میکنیم
           const format = jalaliTicksFormat[unit] || 'jYYYY/jMM/jDD HH:mm';
 
           // تبدیل تایم‌استمپ به شمسی
-          moment.loadPersian({dialect: "persian-modern"});
           const formatted = moment(value).format(format);
 
-          if (extra.level > 0) {
+          if (isFirstDayOfMonthJalali) {
+          // if (extra.level > 0) {
             return `{primary|${formatted}}`;
           } else {
             return formatted;
