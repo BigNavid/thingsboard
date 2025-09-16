@@ -386,6 +386,12 @@ import {
   ValueStepperWidgetSettingsComponent
 } from '@home/components/widget/lib/settings/control/value-stepper-widget-settings.component';
 import { MapWidgetSettingsComponent } from '@home/components/widget/lib/settings/map/map-widget-settings.component';
+import {
+  ApiUsageWidgetSettingsComponent
+} from "@home/components/widget/lib/settings/cards/api-usage-widget-settings.component";
+import {
+  ApiUsageDataKeyRowComponent
+} from "@home/components/widget/lib/settings/cards/api-usage-data-key-row.component";
 
 @NgModule({
   declarations: [
@@ -522,7 +528,9 @@ import { MapWidgetSettingsComponent } from '@home/components/widget/lib/settings
     LabelValueCardWidgetSettingsComponent,
     UnreadNotificationWidgetSettingsComponent,
     ScadaSymbolWidgetSettingsComponent,
-    MapWidgetSettingsComponent
+    MapWidgetSettingsComponent,
+    ApiUsageWidgetSettingsComponent,
+    ApiUsageDataKeyRowComponent
   ],
   imports: [
     CommonModule,
@@ -664,7 +672,8 @@ import { MapWidgetSettingsComponent } from '@home/components/widget/lib/settings
     LabelValueCardWidgetSettingsComponent,
     UnreadNotificationWidgetSettingsComponent,
     ScadaSymbolWidgetSettingsComponent,
-    MapWidgetSettingsComponent
+    MapWidgetSettingsComponent,
+    ApiUsageWidgetSettingsComponent
   ]
 })
 export class WidgetSettingsModule {
